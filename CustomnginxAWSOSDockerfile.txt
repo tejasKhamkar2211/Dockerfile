@@ -1,6 +1,0 @@
-FROM amazonlinux:latest
-RUN yum update -y && yum install nginx -y
-COPY custom.sh /usr/local/bin/custom.sh
-RUN chmod +x /usr/local/bin/custom.sh
-EXPOSE 80
-ENTRYPOINT ["/bin/bash", "-c", "/usr/local/bin/custom.sh && nginx -g 'daemon off;'"]
