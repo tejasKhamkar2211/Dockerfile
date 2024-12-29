@@ -1,0 +1,49 @@
+version: '3.9'
+services:
+ web:
+  build:
+   context: ./web
+  container_name: webpod
+  ports:
+   - 80:80
+  volumes:
+   - ./web/htmlcode:/usr/share/nginx/html
+  networks:
+   - mywebnet
+
+
+
+ app:
+  build:
+   context: ./app
+  container_name: apppod
+  ports:
+   - 9000
+  volumes:
+   - ./app/phpcode:/usr/share/nginx/html
+  networks:
+   - mywebnet
+   - myappnet
+
+ db:
+  build:
+   context: ./db
+  container_name: dbpod
+  ports:
+   - 3306
+  volumes:
+   - backupforsql:/var/lib/sql
+  networks:
+   - myappnet
+
+
+networks:
+ mywebnet:
+  driver: bridge
+ myappnet:
+  driver: bridge
+
+
+volumes:
+ backupforsql:
+
