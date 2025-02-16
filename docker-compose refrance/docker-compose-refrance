@@ -1,0 +1,64 @@
+version: '3.8'  # Define Compose file version
+
+services:
+  app:
+    image: node:latest  # Use official Node.js image
+    container_name: my_node_app  # Custom container name
+    build: .  # Build from local Dockerfile
+    restart: always  # Restart policy (no, always, unless-stopped, on-failure)
+    ports:
+      - "3000:3000"  # Map host port to container port
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env  # Load environment variables from a file
+    networks:
+      - app_network  # Attach to a custom network
+    depends_on:
+      - db  # Ensure database starts first
+    volumes:
+      - ./app:/usr/src/app  # Bind mount
+      - app_data:/data  # Named volume
+    command: ["node", "server.js"]  # Override default command
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      replicas: 3  # Number of replicas (Swarm mode)
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  db:
+    image: postgres:latest
+    container_name: my_postgres_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secret
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge  # Custom network
+
+volumes:
+  app_data:
+    driver: local
+  db_data:
+    driver: local
+
+secrets:
+  db_password:
+    file: ./db_password.txt
+
+configs:
+  app_config:
+    file: ./config.json
